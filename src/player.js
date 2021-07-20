@@ -24,7 +24,11 @@ var Player = function(url, options) {
 	this.loop = options.loop !== false;
 	this.autoplay = !!options.autoplay || options.streaming;
 
-	this.demuxer = new JSMpeg.Demuxer.TS(options);
+	this.tsDemuxer = new JSMpeg.Demuxer.TS(options);
+	this.demuxer = new JSMpeg.Demuxer.Rotate(this.tsDemuxer);
+	if (options.onRotate) {
+		this.demuxer.onRotate = options.onRotate;
+	}
 	this.source.connect(this.demuxer);
 
 	if (!options.disableWebAssembly && JSMpeg.WASMModule.IsSupported()) {
@@ -270,7 +274,7 @@ Player.prototype.updateForStaticFile = function() {
 			notEnoughData = !this.video.decode();
 		}
 
-		headroom = this.demuxer.currentTime - this.audio.currentTime;
+		headroom = this.tsDemuxer.currentTime - this.audio.currentTime;
 	}
 
 
@@ -290,7 +294,7 @@ Player.prototype.updateForStaticFile = function() {
 			notEnoughData = !this.video.decode();
 		}
 
-		headroom = this.demuxer.currentTime - targetTime;
+		headroom = this.tsDemuxer.currentTime - targetTime;
 	}
 
 	// Notify the source of the playhead headroom, so it can decide whether to

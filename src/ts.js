@@ -41,10 +41,12 @@ TS.prototype.write = function(buffer) {
 };
 
 TS.prototype.parsePacket = function() {
+	console.debug('TS.parsePacket');
 	// Check if we're in sync with packet boundaries; attempt to resync if not.
 	if (this.bits.read(8) !== 0x47) {
 		if (!this.resync()) {
 			// Couldn't resync; maybe next time...
+			console.debug('TS.parsePacket: Couldn\'t resync; maybe next time...')
 			return false;
 		}
 	}
@@ -153,8 +155,10 @@ TS.prototype.parsePacket = function() {
 };
 
 TS.prototype.resync = function() {
+	console.debug('TS.resync');
 	// Check if we have enough data to attempt a resync. We need 5 full packets.
 	if (!this.bits.has((188 * 6) << 3)) {
+		console.debug('TS.resync: We haven\'t enough data to attempt a resync. We need 5 full packets.');
 		return false;
 	}
 

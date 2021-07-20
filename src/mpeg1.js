@@ -27,10 +27,12 @@ MPEG1.prototype = Object.create(JSMpeg.Decoder.Base.prototype);
 MPEG1.prototype.constructor = MPEG1;
 
 MPEG1.prototype.write = function(pts, buffers) {
+	console.debug('MPEG1.write');
 	JSMpeg.Decoder.Base.prototype.write.call(this, pts, buffers);
-
 	if (!this.hasSequenceHeader) {
+
 		if (this.bits.findStartCode(MPEG1.START.SEQUENCE) === -1) {
+			console.debug('MPEG1.write: bits.findStartCode is invalid');
 			return false;
 		}
 		this.decodeSequenceHeader();
@@ -42,13 +44,16 @@ MPEG1.prototype.write = function(pts, buffers) {
 };
 
 MPEG1.prototype.decode = function() {
+	console.debug('MPEG1.decode');
 	var startTime = JSMpeg.Now();
 	
 	if (!this.hasSequenceHeader) {
+		console.debug('MPEG1.decode: hasSequenceHeader is invalid');
 		return false;
 	}
 
 	if (this.bits.findStartCode(MPEG1.START.PICTURE) === -1) {
+		console.debug('MPEG1.decode: bits.findStartCode is invalid');
 		var bufferedBytes = this.bits.byteLength - (this.bits.index >> 3);
 		return false;
 	}
@@ -172,6 +177,7 @@ MPEG1.prototype.forwardRSize = 0;
 MPEG1.prototype.forwardF = 0;
 
 MPEG1.prototype.decodePicture = function(skipOutput) {
+	console.debug('MPEG1.decodePicture');
 	this.currentFrame++;
 
 	this.bits.skip(10); // skip temporalReference
@@ -180,6 +186,7 @@ MPEG1.prototype.decodePicture = function(skipOutput) {
 
 	// Skip B and D frames or unknown coding type
 	if (this.pictureType <= 0 || this.pictureType >= MPEG1.PICTURE_TYPE.B) {
+		console.debug('MPEG1.decodePicture: Skip B and D frames or unknown coding type');
 		return;
 	}
 
@@ -189,6 +196,7 @@ MPEG1.prototype.decodePicture = function(skipOutput) {
 		this.forwardFCode = this.bits.read(3);
 		if (this.forwardFCode === 0) {
 			// Ignore picture with zero forward_f_code
+			console.debug('MPEG1.decodePicture: Ignore picture with zero forward_f_code');
 			return;
 		}
 		this.forwardRSize = this.forwardFCode - 1;
@@ -292,6 +300,7 @@ MPEG1.prototype.motionFwHPrev = 0;
 MPEG1.prototype.motionFwVPrev = 0;
 
 MPEG1.prototype.decodeMacroblock = function() {
+	console.debug('MPEG1.decodeMacroblock');
 	// Decode macroblock_address_increment
 	var
 		increment = 0,
@@ -318,6 +327,7 @@ MPEG1.prototype.decodeMacroblock = function() {
 	else {
 		if (this.macroblockAddress + increment >= this.mbSize) {
 			// Illegal (too large) macroblock_address_increment
+			console.debug('MPEG1.decodeMacroblock: Illegal (too large) macroblock_address_increment');
 			return;
 		}
 		if (increment > 1) {
