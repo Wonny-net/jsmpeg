@@ -39,15 +39,15 @@ WSSource.prototype.start = function() {
 	this.progress = 0;
 	this.established = false;
 
-	if(this.options.protocols) {
+	if (this.options.protocols) {
 		this.socket = new WebSocket(this.url, this.options.protocols);
-	}else{
+	} else {
 		this.socket = new WebSocket(this.url);
 	}
 	this.socket.binaryType = 'arraybuffer';
 	this.socket.onmessage = this.onMessage.bind(this);
 	this.socket.onopen = this.onOpen.bind(this);
-	this.socket.onerror = this.onClose.bind(this);
+	this.socket.onerror = this.onError.bind(this);
 	this.socket.onclose = this.onClose.bind(this);
 };
 
@@ -67,6 +67,11 @@ WSSource.prototype.onClose = function() {
 		}.bind(this), this.reconnectInterval*1000);
 	}
 };
+
+WSSource.prototype.onError = function() {
+	console.error('websocket error -- ' + JSON.stringify(arguments));
+	this.onClose();
+}
 
 WSSource.prototype.onMessage = function(ev) {
 	var isFirstChunk = !this.established;
