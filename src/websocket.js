@@ -2,6 +2,7 @@ JSMpeg.Source.WebSocket = (function(){ "use strict";
 
 var WSSource = function(url, options) {
 	this.url = url;
+	this.urlAudio = options.urlAudio || null;
 	this.options = options;
 	this.socket = null;
 	this.streaming = true;
@@ -39,16 +40,22 @@ WSSource.prototype.start = function() {
 	this.progress = 0;
 	this.established = false;
 
+	this.socket = this.newSocket(this.url);
+};
+
+WSSource.prototype.newSocket = function(url) {
+	var socket
 	if (this.options.protocols) {
-		this.socket = new WebSocket(this.url, this.options.protocols);
+		socket = new WebSocket(url, this.options.protocols);
 	} else {
-		this.socket = new WebSocket(this.url);
+		socket = new WebSocket(url);
 	}
-	this.socket.binaryType = 'arraybuffer';
-	this.socket.onmessage = this.onMessage.bind(this);
-	this.socket.onopen = this.onOpen.bind(this);
-	this.socket.onerror = this.onError.bind(this);
-	this.socket.onclose = this.onClose.bind(this);
+	socket.binaryType = 'arraybuffer';
+	socket.onmessage = this.onMessage.bind(this);
+	socket.onopen = this.onOpen.bind(this);
+	socket.onerror = this.onError.bind(this);
+	socket.onclose = this.onClose.bind(this);
+	return socket;
 };
 
 WSSource.prototype.resume = function(secondsHeadroom) {
@@ -65,6 +72,9 @@ WSSource.prototype.onClose = function() {
 		this.reconnectTimeoutId = setTimeout(function(){
 			this.start();	
 		}.bind(this), this.reconnectInterval*1000);
+	}
+	if (this.options.onCloseCallback !== undefined) {
+		this.options.onCloseCallback();
 	}
 };
 

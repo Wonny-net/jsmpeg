@@ -166,7 +166,7 @@ Player.prototype.destroy = function() {
 	this.pause();
 	this.source.destroy();
 	this.video && this.video.destroy();
-	this.renderer && this.renderer.destroy();
+	// this.renderer && this.renderer.destroy();
 	this.audio && this.audio.destroy();
 	this.audioOut && this.audioOut.destroy();
 };

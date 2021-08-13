@@ -41,7 +41,6 @@ TS.prototype.write = function(buffer) {
 };
 
 TS.prototype.parsePacket = function() {
-	console.debug('TS.parsePacket');
 	// Check if we're in sync with packet boundaries; attempt to resync if not.
 	if (this.bits.read(8) !== 0x47) {
 		if (!this.resync()) {
