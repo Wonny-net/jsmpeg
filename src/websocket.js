@@ -23,6 +23,10 @@ var WSSource = function(url, options) {
 
 	this.onEstablishedCallback = options.onSourceEstablished;
 	this.onCompletedCallback = options.onSourceCompleted; // Never used
+
+	if (options.downloadBuffer || false) {
+		this.allBuffer = new JSMpeg.BitBuffer(0, JSMpeg.BitBuffer.MODE.EXPAND);
+	}
 };
 
 WSSource.prototype.connect = function(destination) {
@@ -93,6 +97,10 @@ WSSource.prototype.onMessage = function(ev) {
 
 	if (this.destination) {
 		this.destination.write(ev.data);
+	}
+
+	if (this.allBuffer !== undefined) {
+		this.allBuffer.write(ev.data);
 	}
 };
 
